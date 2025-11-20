@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
 
 export default function App() {
   const [peso, setPeso] = useState('');
@@ -11,13 +11,26 @@ export default function App() {
 
   const calcularIMC = () => {
     if (!peso || !altura) {
-      setMensaje('Por favor ingresa peso y altura');
-      setResultado(null);
-      setImagen(null);
+      Alert.alert('Campos vacíos', 'Por favor ingresa el peso y la altura.');
       return;
     }
 
-    const imc = parseFloat(peso) / (parseFloat(altura) * parseFloat(altura));
+    const pesoNum = parseFloat(peso);
+    const alturaNum = parseFloat(altura);
+
+    if (isNaN(pesoNum) || isNaN(alturaNum)) {
+      Alert.alert('Dato inválido', 'Solo se permiten números.');
+      return;
+    }
+
+    if (alturaNum <= 0 || pesoNum <= 0) {
+      Alert.alert('Dato incorrecto', 'Los valores deben ser mayores a 0.');
+      return;
+    }
+
+    // Convertir cm a metros
+    const alturaMetros = alturaNum / 100;
+    const imc = pesoNum / (alturaMetros * alturaMetros);
     setResultado(imc.toFixed(2));
 
     if (imc < 18.5) {
@@ -43,6 +56,14 @@ export default function App() {
     setImagen(null);
   };
 
+  const handlePesoChange = (text) => {
+    if (/^\d{0,3}$/.test(text)) setPeso(text);
+  };
+
+  const handleAlturaChange = (text) => {
+    if (/^\d{0,3}$/.test(text)) setAltura(text);
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Calculadora de IMC</Text>
@@ -53,16 +74,18 @@ export default function App() {
         placeholderTextColor="#aaa"
         keyboardType="numeric"
         value={peso}
-        onChangeText={setPeso}
+        onChangeText={handlePesoChange}
+        maxLength={3}
       />
 
       <TextInput
         style={styles.input}
-        placeholder="Altura (m)"
+        placeholder="Altura (cm)"
         placeholderTextColor="#aaa"
         keyboardType="numeric"
         value={altura}
-        onChangeText={setAltura}
+        onChangeText={handleAlturaChange}
+        maxLength={3}
       />
 
       <View style={styles.buttonsContainer}>
