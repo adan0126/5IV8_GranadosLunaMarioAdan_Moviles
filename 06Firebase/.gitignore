@@ -42,3 +42,4 @@ yarn-error.*
 
 # Firebase
 firebase-debug.log
+firebase.js
